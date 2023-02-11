@@ -1,0 +1,12 @@
+{
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/WP2Static/wp2static-addon-s3"
+    }
+  ],
+  "require": {
+    "leonstafford/wp2static": "^7.1.7",
+    "leonstafford/wp2static-addon-s3": "^1.0"
+  }
+}
