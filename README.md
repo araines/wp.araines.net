@@ -87,3 +87,13 @@ The admin interface can be accessed by [wp-admin](http://wordpress.food.araines.
 ### Generate static site: Unable to fetch URL contents
 
 During the static site generation, if it gets a 500 error with the last log being "Unable to fetch URL contents" then try clearing the caches.
+
+## TODO
+
+Configure OIDC (separate repo?) to allow GitHub actions to talk to AWS
+Set up GitHub actions with AWS
+Create an action for building docker container and pushing to ECR
+Update the apache2-endpoint.sh to work in the ECR environment (with correct DNS/IPs etc)
+Update the apache2-endpoint.sh to update R53 so container is accessible
+Set up multisite
+Update the apache2-endpoint.sh to install GP Premium / recipe plugins / backup plugins / etc

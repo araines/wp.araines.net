@@ -14,7 +14,8 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Product = var.site_domain
+      Product    = var.site_domain
+      Repository = "wp.araines.net"
     }
   }
 }
@@ -25,7 +26,8 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Product = var.site_domain
+      Product    = var.site_domain
+      Repository = "wp.araines.net"
     }
   }
 }
