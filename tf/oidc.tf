@@ -8,6 +8,26 @@ module "github-oidc" {
   role_name            = "${var.site_name}-github-oidc"
   role_description     = "Role assumed by the ${var.site_domain} GitHub OIDC provider"
 
-  repositories              = ["araines/wp.araines.net"]
-  oidc_role_attach_policies = ["arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"]
+  repositories = ["araines/wp.araines.net"]
+  oidc_role_attach_policies = [
+    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+    aws_iam_policy.deploy.arn,
+  ]
+}
+
+data "aws_iam_policy_document" "deploy" {
+  statement {
+    actions = ["s3:*"]
+    effect  = "Allow"
+    resources = [
+      "arn:aws:s3:::araines-tfstate",
+      "arn:aws:s3:::araines-tfstate/araines.net/terraform.tfstate",
+    ]
+  }
+}
+
+resource "aws_iam_policy" "deploy" {
+  name        = "${var.site_name}_Deploy"
+  description = "Policy allowing GitHub Actions to deploy via terraform"
+  policy      = data.aws_iam_policy_document.deploy.json
 }
