@@ -10,19 +10,25 @@ Static serverless WordPress site for my personal blog
 terraform init
 ```
 
-2. Set up initial WordPress build
+2. Set up OIDC with GitHub actions
+
+```
+terraform apply -target module.wordpress.module.github-oidc
+```
+
+3. Set up initial WordPress build
 
 ```
 terraform apply
 ```
 
-3. Start up WordPress (see below) and navigate to the admin interface
+4. Start up WordPress (see below) and navigate to the admin interface
 
-4. Change the admin password
+5. Change the admin password
 
-5. Install and activate the `GeneratePass` theme
+6. Install and activate the `GeneratePass` theme
 
-6. Customise the theme
+7. Customise the theme
 
    a. The following colours:
 
@@ -38,15 +44,15 @@ terraform apply
 
    b. Change "Entry meta text" to `accent`
 
-7. Go to Settings->Permalinks and select Post Name
+8. Go to Settings->Permalinks and select Post Name
 
-8. Go to Settings->General and configure timezones, language etc
+9. Go to Settings->General and configure timezones, language etc
 
-9. Go to Settings->Discussion and disable everything in "Default post settings"
+10. Go to Settings->Discussion and disable everything in "Default post settings"
 
-10. Install and activate `Yoast SEO` plugin (consider Rank Math?)
+11. Install and activate `Yoast SEO` plugin (consider Rank Math?)
 
-11. Install and activate `UpdraftPlus` plugin for backups / local dev
+12. Install and activate `UpdraftPlus` plugin for backups / local dev
 
 ## Starting / stopping WordPress
 
@@ -90,8 +96,7 @@ During the static site generation, if it gets a 500 error with the last log bein
 
 ## TODO
 
-Configure OIDC (separate repo?) to allow GitHub actions to talk to AWS
-Set up GitHub actions with AWS
+Configure OIDC to allow GitHub actions to talk to AWS - permissions need doing
 Create an action for building docker container and pushing to ECR
 Update the apache2-endpoint.sh to work in the ECR environment (with correct DNS/IPs etc)
 Update the apache2-endpoint.sh to update R53 so container is accessible

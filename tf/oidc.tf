@@ -15,6 +15,7 @@ module "github-oidc" {
   ]
 }
 
+#TODO: Make this more specific
 data "aws_iam_policy_document" "deploy" {
   statement {
     actions = ["s3:*"]
@@ -23,6 +24,29 @@ data "aws_iam_policy_document" "deploy" {
       "arn:aws:s3:::araines-tfstate",
       "arn:aws:s3:::araines-tfstate/araines.net/terraform.tfstate",
     ]
+  }
+
+  statement {
+    not_actions = [
+      "iam:*",
+      "organizations:*",
+      "account:*",
+    ]
+    effect    = "Allow"
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
+      "iam:CreateServiceLinkedRole",
+      "iam:DeleteServiceLinkedRole",
+      "iam:ListRoles",
+      "organizations:DescribeOrganization",
+      "account:ListRegions",
+      "account:GetAccountInformation"
+    ]
+    effect    = "Allow"
+    resources = ["*"]
   }
 }
 
