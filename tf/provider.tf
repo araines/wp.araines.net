@@ -1,5 +1,5 @@
 terraform {
-  required_version = "~> 1.3"
+  required_version = "~> 1.8"
   required_providers {
     aws = {
       source                = "hashicorp/aws"
@@ -15,7 +15,7 @@ provider "aws" {
   default_tags {
     tags = {
       Product    = var.site_domain
-      Repository = "wp.araines.net"
+      Repository = var.repository
     }
   }
 }
@@ -27,7 +27,7 @@ provider "aws" {
   default_tags {
     tags = {
       Product    = var.site_domain
-      Repository = "wp.araines.net"
+      Repository = var.repository
     }
   }
 }

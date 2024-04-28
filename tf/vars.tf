@@ -4,6 +4,11 @@ variable "launch" {
   default     = 0
 }
 
+variable "repository" {
+  description = "The GitHub repository name for tagging purposes"
+  type        = string
+}
+
 variable "aws_region" {
   type    = string
   default = "eu-west-1"

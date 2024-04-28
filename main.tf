@@ -11,6 +11,7 @@ terraform {
 module "wordpress" {
   source = "./tf"
 
+  repository            = "wp.araines.net"
   site_name             = "blog"
   site_domain           = "araines.net"
   hosted_zone_id        = "Z1BMFFD43RYRYX"
