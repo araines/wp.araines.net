@@ -50,6 +50,7 @@ data "aws_iam_policy_document" "deploy" {
       "iam:GetOpenIDConnectProvider",
       "iam:ListRolePolicies",
       "iam:ListAttachedRolePolicies",
+      "iam:PassRole"
     ]
     effect    = "Allow"
     resources = ["*"]
