@@ -43,7 +43,13 @@ data "aws_iam_policy_document" "deploy" {
       "iam:ListRoles",
       "organizations:DescribeOrganization",
       "account:ListRegions",
-      "account:GetAccountInformation"
+      "account:GetAccountInformation",
+      "iam:GetRole",
+      "iam:GetPolicy",
+      "iam:GetPolicyVersion",
+      "iam:GetOpenIDConnectProvider",
+      "iam:ListRolePolicies",
+      "iam:ListAttachedRolePolicies",
     ]
     effect    = "Allow"
     resources = ["*"]
