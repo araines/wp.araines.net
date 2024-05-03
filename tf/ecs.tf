@@ -120,6 +120,7 @@ resource "aws_ecs_task_definition" "wordpress_container" {
     wordpress_admin_user     = var.wordpress_admin_user
     wordpress_admin_password = var.wordpress_admin_password
     wordpress_admin_email    = var.wordpress_admin_email
+    wordpress_site_name      = var.wordpress_site_name
     site_name                = var.site_name
   })
 

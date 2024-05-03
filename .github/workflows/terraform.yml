@@ -54,7 +54,7 @@ jobs:
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: blog-serverless-wordpress #TODO: Get this from Terraform perhaps?
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_TAG: latest
         run: |
-          docker build -t $REGISTRY/$REPOSITORY:latest wordpress
-          docker push $REGISTRY/$REPOSITORY:latest
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG wordpress
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
