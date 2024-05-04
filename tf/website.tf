@@ -45,7 +45,7 @@ resource "random_password" "s3_referer_header" {
 
 resource "aws_cloudfront_distribution" "website" {
   origin {
-    domain_name = aws_s3_bucket_website_configuration.website.website_domain
+    domain_name = aws_s3_bucket_website_configuration.website.website_endpoint
     origin_id   = local.s3_origin_id
 
     custom_header {
