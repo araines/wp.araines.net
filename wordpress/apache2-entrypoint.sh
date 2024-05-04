@@ -92,6 +92,8 @@ fi
 if ! sudo -E -u www-data wp plugin is-installed syntax-highlighting-code-block; then
   echo "Syntax Highlighting Code Block not installed: installing Syntax Highlighting Code Block"
   sudo -E -u www-data wp plugin install --activate syntax-highlighting-code-block
+  sudo -E -u www-data wp option update syntax_highlighting --format=json \
+    '{"theme_name":"a11y-dark","highlighted_line_background_color":"#4a4a4a"}'
 fi
 
 # Update WordPress options with IP of running container
