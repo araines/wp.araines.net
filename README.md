@@ -26,23 +26,35 @@ terraform apply
 
 5. Change the admin password
 
-6. Customise the theme
+6. Customise the theme (TwentyTwentyFour)
 
-   a. TODO
+### Customising the Theme
+
+Change the style to Onyx.
+
+#### Typography
+
+TODO
+
+#### Colours
+
+TODO
+
+#### Layout
+
+Content width to 860px.
+
+#### Individual Stylebook Elements
+
+Quote style to have medium size font.
+
+Code style to have small size font.
 
 ## Starting / stopping WordPress
 
-To start up WordPress:
+To start up WordPress, run the "Launch" workflow in GitHub Actions, with the variable set to 1.
 
-```
-terraform apply -var="launch=1"
-```
-
-To shut down WordPress:
-
-```
-terraform apply
-```
+To shutdown, set the variable to 0.
 
 ## Site publication
 
