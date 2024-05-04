@@ -18,4 +18,12 @@ module "wordpress" {
   wordpress_admin_email = "andrew.raines@gmail.com"
   wordpress_admin_user  = "araines"
   wordpress_site_name   = "Andy Raines"
+
+  launch = var.launch
+}
+
+variable "launch" {
+  description = "Spin up/down WordPress (1 to spin up)"
+  type        = number
+  default     = 0
 }
