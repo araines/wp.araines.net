@@ -88,6 +88,12 @@ if ! sudo -E -u www-data wp plugin is-installed wordpress-seo; then
   sudo -E -u www-data wp plugin install --activate wordpress-seo
 fi
 
+# Install Syntax Highlighting Code Block
+if ! sudo -E -u www-data wp plugin is-installed syntax-highlighting-code-block; then
+  echo "Syntax Highlighting Code Block not installed: installing Syntax Highlighting Code Block"
+  sudo -E -u www-data wp plugin install --activate syntax-highlighting-code-block
+fi
+
 # Update WordPress options with IP of running container
 sudo -E -u www-data wp option update siteurl "http://${CONTAINER_DNS}"
 sudo -E -u www-data wp option update home "http://${CONTAINER_DNS}"
