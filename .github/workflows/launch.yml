@@ -1,0 +1,38 @@
+name: Launch
+
+on:
+  workflow_dispatch:
+    inputs:
+      launch:
+        description: "Whether to launch the WordPress site or not"
+        required: false
+        default: 0
+        type: choice
+        options:
+          - 0
+          - 1
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: "arn:aws:iam::263804027495:role/blog-github-oidc" #TODO: account id hardcoded here
+          aws-region: eu-west-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - run: terraform init
+
+      - run: terraform apply -input=false -auto-approve -var="launch=${{ inputs.launch}}"
