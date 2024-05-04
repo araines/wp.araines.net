@@ -1,5 +1,7 @@
 FROM wordpress:php8.2-apache
 
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
 RUN apt-get update && apt-get install -y sudo jq awscli mariadb-client curl zip git
 
 # Download and install wp-cli
