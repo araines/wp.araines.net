@@ -1,4 +1,4 @@
-name: Terraform
+name: Deploy
 
 on:
   push:
@@ -23,7 +23,7 @@ jobs:
           aws-region: eu-west-1
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
 
       - run: terraform init
 
