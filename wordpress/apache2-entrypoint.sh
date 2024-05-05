@@ -96,6 +96,12 @@ if ! sudo -E -u www-data wp plugin is-installed syntax-highlighting-code-block; 
     '{"theme_name":"a11y-dark","highlighted_line_background_color":"#4a4a4a"}'
 fi
 
+# Install Safe SVG (for site logo)
+if ! sudo -E -u www-data wp plugin is-installed safe-svg; then
+  echo "Safe SVG not installed: installing Safe SVG"
+  sudo -E -u www-data wp plugin install --activate safe-svg
+fi
+
 # Update WordPress options with IP of running container
 sudo -E -u www-data wp option update siteurl "http://${CONTAINER_DNS}"
 sudo -E -u www-data wp option update home "http://${CONTAINER_DNS}"
