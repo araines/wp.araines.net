@@ -102,6 +102,21 @@ if ! sudo -E -u www-data wp plugin is-installed safe-svg; then
   sudo -E -u www-data wp plugin install --activate safe-svg
 fi
 
+# Install EWWW Image Optimizer (webp)
+if ! sudo -E -u www-data wp plugin is-installed ewww-image-optimizer; then
+  echo "EWWW not installed: installing EWWW"
+  sudo -E -u www-data wp plugin install --activate ewww-image-optimizer
+  sudo -E -u www-data wp option update ewww_image_optimizer_backup_files local
+  sudo -E -u www-data wp option update ewww_image_optimizer_picture_webp 1
+  sudo -E -u www-data wp option update ewww_image_optimizer_goal_site_speed 1
+  sudo -E -u www-data wp option update ewww_image_optimizer_dismiss_exec_notice 1
+  sudo -E -u www-data wp option update ewww_image_optimizer_webp 1
+  sudo -E -u www-data wp option update ewww_image_optimizer_maxmediawidth 2560
+  sudo -E -u www-data wp option update ewww_image_optimizer_maxmediaheight 2560
+  sudo -E -u www-data wp option update ewww_image_optimizer_wizard_complete 1
+  sudo -E -u www-data wp option update ewww_image_optimizer_hide_newsletter_signup 1
+fi
+
 # Update WordPress options with IP of running container
 sudo -E -u www-data wp option update siteurl "http://${CONTAINER_DNS}"
 sudo -E -u www-data wp option update home "http://${CONTAINER_DNS}"
