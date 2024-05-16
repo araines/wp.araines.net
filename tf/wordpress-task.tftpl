@@ -1,5 +1,6 @@
+${jsonencode(
 [
-  ${jsonencode({
+  {
     "cpu": tonumber(container_cpu),
     "environment": [
       {"name": "ECS_ENABLE_CONTAINER_METADATA", "value": "true"},
@@ -18,7 +19,7 @@
       {"name": "WORDPRESS_SITE_NAME", "value": "${wordpress_site_name}"}
     ],
     "essential": true,
-    "image": "${wordpress_image}",
+    "image": "${image_wp}",
     "memory": tonumber(container_memory),
     "name": "wordpress",
     "portMappings": [
@@ -30,7 +31,7 @@
     ],
     "mountPoints" : [
       {
-        "sourceVolume": "${efs_source_volume}",
+        "sourceVolume": "${efs_wp}",
         "containerPath": "/var/www/html",
         "readOnly": false
       }
@@ -39,10 +40,54 @@
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
-        "awslogs-group": "/aws/ecs/${site_name}-serverless-wordpress-container",
+        "awslogs-group": "${logs_wp}",
         "awslogs-region": "${wp_region}",
         "awslogs-stream-prefix": "ecs"
       }
+    },
+    "dependsOn": [
+      {
+        "containerName": "database",
+        "condition": "HEALTHY"
+      }
+    ]
+  },
+  {
+    "cpu": tonumber(container_cpu),
+    "environment": [
+      {"name": "ECS_ENABLE_CONTAINER_METADATA", "value": "true"},
+      {"name": "MYSQL_ROOT_PASSWORD", "value": "${db_root_password}"},
+      {"name": "MYSQL_DATABASE", "value": "${db_name}"},
+      {"name": "MYSQL_USER", "value": "${db_user}"},
+      {"name": "MYSQL_PASSWORD", "value": "${db_password}"},
+    ],
+    "essential": true,
+    "image": "${image_db}",
+    "memory": tonumber(container_memory),
+    "name": "database",
+    "portMappings": [],
+    "mountPoints" : [
+      {
+        "sourceVolume": "${efs_db}",
+        "containerPath": "/var/lib/mysql",
+        "readOnly": false
+      }
+    ],
+    "volumesFrom" : [],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${logs_db}",
+        "awslogs-region": "${wp_region}",
+        "awslogs-stream-prefix": "ecs"
+      }
+    },
+    "healthcheck": {
+      "command": ["CMD", "mysqladmin", "ping", "-h", "localhost"],
+      "interval": 5,
+      "retries": 10,
+      "timeout": 5
     }
-  })}
+  }
 ]
+)}

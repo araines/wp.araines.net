@@ -1,6 +1,13 @@
 # ECS for running the dynamic WordPress site
 
-resource "aws_efs_file_system" "wordpress_persistent" {
+resource "aws_efs_file_system" "wordpress" {
+  encrypted = true
+  lifecycle_policy {
+    transition_to_ia = "AFTER_7_DAYS"
+  }
+}
+
+resource "aws_efs_file_system" "database" {
   encrypted = true
   lifecycle_policy {
     transition_to_ia = "AFTER_7_DAYS"
@@ -70,7 +77,11 @@ resource "aws_iam_role_policy_attachment" "wordpress_role_attachment_cloudwatch"
 }
 
 resource "aws_efs_access_point" "wordpress_efs" {
-  file_system_id = aws_efs_file_system.wordpress_persistent.id
+  file_system_id = aws_efs_file_system.wordpress.id
+}
+
+resource "aws_efs_access_point" "database_efs" {
+  file_system_id = aws_efs_file_system.database.id
 }
 
 resource "aws_security_group" "efs_security_group" {
@@ -91,32 +102,66 @@ resource "aws_security_group_rule" "efs_ingress" {
 
 resource "aws_efs_mount_target" "wordpress_efs" {
   count           = length(module.vpc.public_subnets)
-  file_system_id  = aws_efs_file_system.wordpress_persistent.id
+  file_system_id  = aws_efs_file_system.wordpress.id
+  subnet_id       = module.vpc.public_subnets[count.index]
+  security_groups = [aws_security_group.efs_security_group.id]
+}
+
+resource "aws_efs_mount_target" "database_efs" {
+  count           = length(module.vpc.public_subnets)
+  file_system_id  = aws_efs_file_system.database.id
   subnet_id       = module.vpc.public_subnets[count.index]
   security_groups = [aws_security_group.efs_security_group.id]
 }
 
 resource "aws_cloudwatch_log_group" "wordpress_container" {
-  name              = "/aws/ecs/${var.site_name}-serverless-wordpress-container"
+  name              = "/aws/ecs/${var.site_name}-wordpress"
   retention_in_days = 7
 }
 
-resource "aws_ecs_task_definition" "wordpress_container" {
+resource "aws_cloudwatch_log_group" "database_container" {
+  name              = "/aws/ecs/${var.site_name}-database"
+  retention_in_days = 7
+}
+
+resource "random_password" "database" {
+  length           = 16
+  special          = true
+  override_special = "!#%&*()-_=+[]<>"
+}
+
+resource "random_password" "database_root" {
+  length           = 16
+  special          = true
+  override_special = "!#%&*()-_=+[]<>"
+}
+
+resource "aws_ecs_task_definition" "wordpress" {
   family = "${var.site_name}_wordpress"
   container_definitions = templatefile("${path.module}/wordpress-task.tftpl", {
-    db_host                  = aws_rds_cluster.serverless_wordpress.endpoint,
-    db_user                  = aws_rds_cluster.serverless_wordpress.master_username,
-    db_password              = random_password.serverless_wordpress_password.result,
-    db_name                  = aws_rds_cluster.serverless_wordpress.database_name,
-    wordpress_image          = "${aws_ecr_repository.serverless_wordpress.repository_url}:latest",
-    wp_dest                  = "https://${var.site_domain}",
-    wp_region                = var.aws_region,
-    wp_bucket                = aws_s3_bucket.website.id,
+    db_host          = "127.0.0.1"
+    db_user          = "wordpress"
+    db_password      = random_password.database.result
+    db_name          = "wordpress"
+    db_root_password = random_password.database_root.result
+
+    wp_dest   = "https://${var.site_domain}"
+    wp_region = var.aws_region
+    wp_bucket = aws_s3_bucket.website.id
+
+    logs_wp = aws_cloudwatch_log_group.wordpress_container.name
+    logs_db = aws_cloudwatch_log_group.database_container.name
+
+    efs_wp = "${var.site_name}_wordpress"
+    efs_db = "${var.site_name}_database"
+
+    image_wp = "${aws_ecr_repository.serverless_wordpress.repository_url}:latest",
+    image_db = "mysql"
+
     container_dns            = "wordpress.${var.site_domain}",
     container_dns_zone       = var.hosted_zone_id,
     container_cpu            = 1024,
     container_memory         = 2048,
-    efs_source_volume        = "${var.site_name}_wordpress_persistent"
     wordpress_admin_user     = var.wordpress_admin_user
     wordpress_admin_password = var.wordpress_admin_password
     wordpress_admin_email    = var.wordpress_admin_email
@@ -124,20 +169,30 @@ resource "aws_ecs_task_definition" "wordpress_container" {
     site_name                = var.site_name
   })
 
-  cpu                      = 1024
-  memory                   = 2048
+  cpu                      = 2048
+  memory                   = 4096
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   execution_role_arn       = aws_iam_role.wordpress_task.arn
   task_role_arn            = aws_iam_role.wordpress_task.arn
 
   volume {
-    name = "${var.site_name}_wordpress_persistent"
+    name = "${var.site_name}_wordpress"
     efs_volume_configuration {
-      file_system_id     = aws_efs_file_system.wordpress_persistent.id
+      file_system_id     = aws_efs_file_system.wordpress.id
       transit_encryption = "ENABLED"
       authorization_config {
         access_point_id = aws_efs_access_point.wordpress_efs.id
+      }
+    }
+  }
+  volume {
+    name = "${var.site_name}_database"
+    efs_volume_configuration {
+      file_system_id     = aws_efs_file_system.database.id
+      transit_encryption = "ENABLED"
+      authorization_config {
+        access_point_id = aws_efs_access_point.database_efs.id
       }
     }
   }
@@ -145,7 +200,8 @@ resource "aws_ecs_task_definition" "wordpress_container" {
     "Name" = "${var.site_name}_WordpressECS"
   }
   depends_on = [
-    aws_efs_file_system.wordpress_persistent
+    aws_efs_file_system.wordpress,
+    aws_efs_file_system.database
   ]
 }
 
@@ -195,21 +251,15 @@ resource "aws_security_group_rule" "wordpress_sg_egress_443" {
   protocol          = "TCP"
 }
 
-resource "aws_security_group_rule" "wordpress_sg_egress_3306" {
-  description              = "Egress from Wordpress container to Aurora Database"
-  security_group_id        = aws_security_group.wordpress_security_group.id
-  source_security_group_id = aws_security_group.aurora_serverless_group.id
-  type                     = "egress"
-  from_port                = 3306
-  to_port                  = 3306
-  protocol                 = "TCP"
-}
-
 resource "aws_ecs_service" "wordpress_service" {
   name            = "${var.site_name}_wordpress"
-  task_definition = "${aws_ecs_task_definition.wordpress_container.family}:${aws_ecs_task_definition.wordpress_container.revision}"
+  task_definition = "${aws_ecs_task_definition.wordpress.family}:${aws_ecs_task_definition.wordpress.revision}"
   cluster         = aws_ecs_cluster.wordpress_cluster.arn
   desired_count   = var.launch
+
+  deployment_maximum_percent         = 100
+  deployment_minimum_healthy_percent = 0
+
   capacity_provider_strategy {
     capacity_provider = "FARGATE_SPOT"
     weight            = "100"
