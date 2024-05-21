@@ -17,7 +17,7 @@ module "oidc" {
 }
 
 module "wordpress" {
-  source = "git@github.com:araines/aws-static-wordpress.git"
+  source = "github.com/araines/aws-static-wordpress"
 
   repository            = "wp.araines.net"
   site_name             = "blog"
