@@ -17,6 +17,9 @@ RUN cd /tmp && \
   rm composer-setup.php && \
   mv composer.phar /usr/local/bin/composer
 
+# Copy custom PHP ini directives
+COPY wordpress.ini $PHP_INI_DIR/conf.d/
+
 # Copy needed files for running
 COPY apache2-entrypoint.sh /usr/local/bin
 COPY composer.json /tmp/
